@@ -1,39 +1,72 @@
 package ee.mihkel.backend.controller;
 
 import ee.mihkel.backend.model.Item;
-import ee.mihkel.backend.repository.ItemRepository;
 import ee.mihkel.backend.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// Teeb beaniks, et oleks võimalik serveris kasutada seda classi
 @RestController
+// Võimaldab pääseda localhost:3000 aadressil meie API otsadele ligi
 @CrossOrigin(origins = "http://localhost:3000")
 public class ItemController {
 
+    // seob ära ItemService classi, et oleks koguaeg ligipääs olemas
+    // Singleton objekt (ei teki iga kord uut mälukohta)
     @Autowired
     ItemService itemService;
 
+    // localhost:8080/items ja GET päring
     @GetMapping("items")
+        // tagastab esemete listi päringu lõpuks
     public List<Item> getItems() {
+        // pöördub itemService funktsiooni poole ja seal tehakse repository'ga
+        // suhtlus
         return itemService.getItems();
     }
 
+    // localhost:8080/items ja POST päring, millele on kaasa antud body
     @PostMapping("items")
-    public String postItem(@RequestBody Item item) {
+    // tagastab mittemidagi  // nõuab body ja mis tüübiks ta selle body teeb
+    public void postItem(@RequestBody Item item) {
+        // pöördub itemService funktsiooni poole ja seal tehakse repository'ga
+        // suhtlus
         itemService.saveItem(item);
-        return "Ese edukalt lisatud " + item.getName();
     }
 
-    // tehke serverile restart
-    // localhost:8080/items
+    @DeleteMapping("delete-item/{id}")
+    public List<Item> deleteItem(@PathVariable Long id) {
+        itemService.deleteItem(id);
+        return itemService.getItems();
+    }
 
-    // delete päringu
-    // edit päringu
-    // view one item päringu
+    @PostMapping("edit-item")
+    public void editItem(@RequestBody Item item) {
+        itemService.editItem(item);
+    }
 
-    // andmebaas
+    @GetMapping("view-item/{id}")
+    public Item getOneItem(@PathVariable Long id) throws Exception {
+        return itemService.getOneItem(id);
+    }
 
-    // kategooria osas
+    //* Täna:
+    //* andmebaas PostgreSQL -- relatsiooniline
+
+    //* delete päringu
+    //* edit päringu
+    //* view one item päringu
+
+    // Swagger
+
+    // Järgmine kord:
+    // frontendis kustuta päringu valmis
+    // edit päring frontendis
+    // view one item päring frontendis
+
+    // custom exceptionite saatmine ??
+    // cache backendis ??
+    // ostukorvi lisada/eemaldada ???
 }
